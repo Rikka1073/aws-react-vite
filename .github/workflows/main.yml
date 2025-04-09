@@ -29,9 +29,9 @@ jobs:
           name: build
           path: ./dist
 
-      - name: Public IP Install
-        id: ip
-        uses: actions/github-script@v4
+      # - name: Public IP Install
+      #   id: ip
+      #   uses: actions/github-script@v4
 
       - name: AWS CLI install
         run: |
