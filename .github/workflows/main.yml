@@ -52,5 +52,11 @@ jobs:
           aws ec2 authorize-security-group-ingress --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
           echo "${{ secrets.PRIVATE_KEY }}" > private_key
           chmod 600 private_key
+
           ssh -oStrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.HOST_NAME }} -i private_key "cd /home/ec2-user/aws-react-vite && git fetch --prune && git checkout main && git pull origin main"
+
+          scp -i private_key -r ./dist ${{ secrets.USER_NAME }}@${{ secrets.HOST_NAME }}:/home/ec2-user/temp-dist
+
+          ssh -oStrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.HOST_NAME }} -i private_key "sudo rm -rf /var/www/aws-react-vite/dist/* && sudo cp -R /home/ec2-user/temp-dist/* /var/www/aws-react-vite/dist/ && sudo chown -R nginx:nginx /var/www/aws-react-vite/dist && rm -rf /home/ec2-user/temp-dist"
+
           aws ec2 revoke-security-group-ingress --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
